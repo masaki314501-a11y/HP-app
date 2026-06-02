@@ -1,0 +1,29 @@
+{
+  "name": "hp-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/masaki314501-a11y/HP-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/masaki314501-a11y/HP-app/issues"
+  },
+  "homepage": "https://github.com/masaki314501-a11y/HP-app#readme",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.96.0",
+    "@google/generative-ai": "^0.24.1",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "groq-sdk": "^1.2.0"
+  }
+}

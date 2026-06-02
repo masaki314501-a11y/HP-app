@@ -1,1 +1,720 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HP作成ツール</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 40px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    }
+    header h1 { font-size: 20px; font-weight: 700; }
+    header .badge {
+      background: rgba(255,255,255,0.2);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      height: calc(100vh - 56px);
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      background: white;
+      padding: 20px 22px;
+      overflow-y: auto;
+      border-right: 1px solid #e8eaf0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .section-block { display: flex; flex-direction: column; gap: 14px; }
+
+    .section-block h2 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #667eea;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 6px;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+
+    label.field-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #777;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    label.field-label .required { color: #e74c3c; margin-left: 3px; }
+
+    input[type="text"], select, textarea {
+      padding: 9px 12px;
+      border: 1px solid #dde1ec;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #fafbff;
+      width: 100%;
+    }
+    input[type="text"]:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102,126,234,0.15);
+    }
+    textarea { resize: vertical; min-height: 75px; }
+
+    /* カラースウォッチ */
+    .color-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+    }
+    .color-option { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
+    .color-option input[type="radio"] { display: none; }
+    .color-swatch {
+      width: 100%;
+      height: 30px;
+      border-radius: 7px;
+      border: 2px solid transparent;
+      transition: border-color 0.2s, transform 0.1s;
+    }
+    .color-option input[type="radio"]:checked + .color-swatch { border-color: #333; transform: scale(1.05); }
+    .color-option span { font-size: 10px; color: #666; }
+
+    /* ピルボタン */
+    .pill-group { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pill { cursor: pointer; }
+    .pill input[type="radio"] { display: none; }
+    .pill span {
+      display: block;
+      padding: 5px 13px;
+      border-radius: 20px;
+      border: 1.5px solid #dde1ec;
+      font-size: 12px;
+      font-family: inherit;
+      color: #555;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .pill input[type="radio"]:checked + span {
+      background: #667eea;
+      border-color: #667eea;
+      color: white;
+      font-weight: 600;
+    }
+    .pill:hover span { border-color: #667eea; color: #667eea; }
+    .pill input[type="radio"]:checked + span:hover { color: white; }
+
+    /* セクションチェックボックス */
+    .section-checks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+    }
+    .sec-check { cursor: pointer; }
+    .sec-check input[type="checkbox"] { display: none; }
+    .sec-check span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 9px;
+      border: 1.5px solid #dde1ec;
+      border-radius: 7px;
+      font-size: 11px;
+      color: #555;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .sec-check span::before {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border: 1.5px solid #ccc;
+      border-radius: 3px;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .sec-check input:checked + span {
+      background: #f0f2ff;
+      border-color: #667eea;
+      color: #667eea;
+      font-weight: 600;
+    }
+    .sec-check input:checked + span::before {
+      background: #667eea;
+      border-color: #667eea;
+      content: '✓';
+      color: white;
+      font-size: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 詳細情報アコーディオン */
+    details { border: 1px solid #e8eaf0; border-radius: 8px; overflow: hidden; }
+    summary {
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+      cursor: pointer;
+      background: #fafbff;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: '＋'; font-size: 14px; color: #aaa; }
+    details[open] summary::after { content: '−'; }
+    .details-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+    /* 生成ボタン */
+    .btn-generate {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 13px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      width: 100%;
+    }
+    .btn-generate:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-generate:active { transform: translateY(0); }
+    .btn-generate:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* ===== PREVIEW ===== */
+    .preview-area { display: flex; flex-direction: column; }
+
+    .preview-toolbar {
+      background: #fff;
+      border-bottom: 1px solid #e8eaf0;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .preview-toolbar h2 { font-size: 13px; font-weight: 600; color: #555; }
+    .toolbar-actions { display: flex; gap: 6px; }
+
+    .btn-secondary {
+      background: #f4f5f9;
+      border: 1px solid #dde1ec;
+      color: #555;
+      padding: 6px 13px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    .btn-secondary:hover { background: #eaecf5; }
+    .btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-action {
+      border: none;
+      color: white;
+      padding: 6px 13px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      font-weight: 500;
+      transition: filter 0.2s;
+    }
+    .btn-action:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-action:hover:not(:disabled) { filter: brightness(0.9); }
+    .btn-copy { background: #2980b9; }
+    .btn-download { background: #27ae60; }
+
+    .preview-frame-wrapper { flex: 1; position: relative; background: #e8eaf0; overflow: hidden; }
+    iframe { width: 100%; height: 100%; border: none; }
+    .mode-tablet, .mode-mobile { overflow-y: auto; display: flex !important; align-items: flex-start; justify-content: center; padding: 16px 16px 0; }
+    .mode-tablet iframe { flex-shrink: 0; width: 768px !important; height: 900px; border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+    .mode-mobile iframe { flex-shrink: 0; width: 390px !important; height: 844px; border-radius: 22px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+    .device-toggle { display: flex; gap: 3px; }
+    .btn-device { background: #f4f5f9; border: 1.5px solid #dde1ec; color: #666; padding: 4px 9px; border-radius: 6px; font-size: 12px; font-family: inherit; cursor: pointer; font-weight: 500; transition: all 0.15s; line-height: 1.4; }
+    .btn-device:hover { border-color: #667eea; color: #667eea; }
+    .btn-device.active { background: #667eea; border-color: #667eea; color: white; }
+
+    .empty-state {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 16px; color: #aaa;
+    }
+    .empty-state .icon { font-size: 56px; opacity: 0.4; }
+    .empty-state p { font-size: 14px; }
+
+    .progress-overlay {
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0.93);
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 18px; z-index: 10;
+    }
+    .progress-overlay.active { display: flex; }
+
+    .spinner {
+      width: 48px; height: 48px;
+      border: 4px solid #e8eaf0;
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .progress-text { font-size: 13px; color: #555; }
+    .progress-bar-wrap { width: 220px; height: 4px; background: #e8eaf0; border-radius: 2px; overflow: hidden; }
+    .progress-bar { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 2px; width: 0%; transition: width 0.3s; }
+    .char-count { font-size: 11px; color: #aaa; }
+
+    .status-bar {
+      background: #1a1a2e;
+      color: #aaa;
+      padding: 7px 16px;
+      font-size: 12px;
+      display: flex; align-items: center; gap: 8px; min-height: 32px;
+    }
+    .status-bar .dot { width: 7px; height: 7px; border-radius: 50%; background: #aaa; flex-shrink: 0; }
+    .status-bar.generating .dot { background: #f39c12; animation: pulse 1s infinite; }
+    .status-bar.done .dot { background: #27ae60; }
+    .status-bar.error .dot { background: #e74c3c; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    @media (max-width: 900px) {
+      .container { grid-template-columns: 1fr; }
+      .preview-area { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>HP作成ツール</h1>
+  <span class="badge">AI搭載</span>
+</header>
+
+<div class="container">
+  <div class="sidebar">
+
+    <!-- 基本情報 -->
+    <div class="section-block">
+      <h2>基本情報</h2>
+
+      <div class="form-group">
+        <label class="field-label">サイト名 <span class="required">*</span></label>
+        <input type="text" id="siteName" placeholder="例: 山田整体院、Cafe Bloom...">
+      </div>
+
+      <div class="form-group">
+        <label class="field-label">サイトの種類</label>
+        <select id="siteType">
+          <option value="ビジネス・会社サイト">ビジネス・会社サイト</option>
+          <option value="飲食店・カフェ">飲食店・カフェ</option>
+          <option value="美容院・エステ">美容院・エステ</option>
+          <option value="医療・クリニック">医療・クリニック</option>
+          <option value="整体・マッサージ">整体・マッサージ</option>
+          <option value="ECサイト・ショップ">ECサイト・ショップ</option>
+          <option value="ポートフォリオ">ポートフォリオ</option>
+          <option value="学校・教育">学校・教育</option>
+          <option value="イベント・ランディングページ">イベント・ランディングページ</option>
+          <option value="その他">その他</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="field-label">説明・コンセプト <span class="required">*</span></label>
+        <textarea id="description" placeholder="例: 東京・渋谷の整体院。肩こり・腰痛専門、完全予約制。"></textarea>
+      </div>
+    </div>
+
+    <!-- デザイン設定 -->
+    <div class="section-block">
+      <h2>デザイン設定</h2>
+
+      <div class="form-group">
+        <label class="field-label">カラーイメージ</label>
+        <div class="color-options">
+          <label class="color-option">
+            <input type="radio" name="color" value="プロフェッショナル（ネイビー×ホワイト）" checked>
+            <div class="color-swatch" style="background:linear-gradient(135deg,#1a3a5c,#4a90d9)"></div>
+            <span>プロ・信頼</span>
+          </label>
+          <label class="color-option">
+            <input type="radio" name="color" value="ナチュラル（グリーン×ベージュ）">
+            <div class="color-swatch" style="background:linear-gradient(135deg,#4a7c59,#c8b99a)"></div>
+            <span>ナチュラル</span>
+          </label>
+          <label class="color-option">
+            <input type="radio" name="color" value="エレガント（パープル×ゴールド）">
+            <div class="color-swatch" style="background:linear-gradient(135deg,#6b3fa0,#d4af37)"></div>
+            <span>エレガント</span>
+          </label>
+          <label class="color-option">
+            <input type="radio" name="color" value="フレッシュ（オレンジ×イエロー）">
+            <div class="color-swatch" style="background:linear-gradient(135deg,#e8722a,#f5c518)"></div>
+            <span>フレッシュ</span>
+          </label>
+          <label class="color-option">
+            <input type="radio" name="color" value="モダン（ブラック×レッド）">
+            <div class="color-swatch" style="background:linear-gradient(135deg,#1a1a1a,#e74c3c)"></div>
+            <span>モダン</span>
+          </label>
+          <label class="color-option">
+            <input type="radio" name="color" value="やさしい（ピンク×ホワイト）">
+            <div class="color-swatch" style="background:linear-gradient(135deg,#e91e8c,#fce4ec)"></div>
+            <span>やさしい</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="field-label">トーン・雰囲気</label>
+        <div class="pill-group">
+          <label class="pill"><input type="radio" name="tone" value="フォーマル・信頼感" checked><span>フォーマル</span></label>
+          <label class="pill"><input type="radio" name="tone" value="カジュアル・親しみやすい"><span>カジュアル</span></label>
+          <label class="pill"><input type="radio" name="tone" value="ポップ・元気"><span>ポップ</span></label>
+          <label class="pill"><input type="radio" name="tone" value="ラグジュアリー・高級感"><span>ラグジュアリー</span></label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="field-label">デザインスタイル</label>
+        <div class="pill-group">
+          <label class="pill"><input type="radio" name="designStyle" value="モダン・スタイリッシュ" checked><span>モダン</span></label>
+          <label class="pill"><input type="radio" name="designStyle" value="ミニマル・シンプル"><span>ミニマル</span></label>
+          <label class="pill"><input type="radio" name="designStyle" value="ボールド・インパクト重視"><span>ボールド</span></label>
+          <label class="pill"><input type="radio" name="designStyle" value="ダーク・クール"><span>ダーク</span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- セクション選択 -->
+    <div class="section-block">
+      <h2>含めるセクション</h2>
+      <div class="section-checks">
+        <label class="sec-check"><input type="checkbox" name="sections" value="ヒーローバナー" checked><span>ヒーロー</span></label>
+        <label class="sec-check"><input type="checkbox" name="sections" value="サービス紹介" checked><span>サービス</span></label>
+        <label class="sec-check"><input type="checkbox" name="sections" value="実績・数字" checked><span>実績・数字</span></label>
+        <label class="sec-check"><input type="checkbox" name="sections" value="料金プラン" checked><span>料金プラン</span></label>
+        <label class="sec-check"><input type="checkbox" name="sections" value="スタッフ紹介"><span>スタッフ紹介</span></label>
+        <label class="sec-check"><input type="checkbox" name="sections" value="お客様の声" checked><span>お客様の声</span></label>
+        <label class="sec-check"><input type="checkbox" name="sections" value="FAQ" checked><span>FAQ</span></label>
+        <label class="sec-check"><input type="checkbox" name="sections" value="お問い合わせ" checked><span>お問い合わせ</span></label>
+        <label class="sec-check"><input type="checkbox" name="sections" value="アクセスマップ"><span>アクセス</span></label>
+        <label class="sec-check"><input type="checkbox" name="sections" value="ブログ・新着情報"><span>ブログ</span></label>
+      </div>
+    </div>
+
+    <!-- 詳細情報（任意） -->
+    <details>
+      <summary>詳細情報（任意）</summary>
+      <div class="details-body">
+        <div class="form-group">
+          <label class="field-label">住所</label>
+          <input type="text" id="address" placeholder="例: 東京都渋谷区○○1-2-3">
+        </div>
+        <div class="form-group">
+          <label class="field-label">電話番号</label>
+          <input type="text" id="phone" placeholder="例: 03-1234-5678">
+        </div>
+        <div class="form-group">
+          <label class="field-label">営業時間</label>
+          <input type="text" id="hours" placeholder="例: 平日10:00〜19:00、土日祝9:00〜18:00">
+        </div>
+        <div class="form-group">
+          <label class="field-label">SNS・URL</label>
+          <input type="text" id="sns" placeholder="例: Instagram: @example、Twitter: @example">
+        </div>
+      </div>
+    </details>
+
+    <button class="btn-generate" id="btnGenerate" onclick="generateHP()">
+      ✨ AIでHPを生成する
+    </button>
+  </div>
+
+  <!-- プレビューエリア -->
+  <div class="preview-area">
+    <div class="preview-toolbar">
+      <h2>プレビュー</h2>
+      <div class="device-toggle">
+        <button class="btn-device active" data-mode="pc" onclick="setDevice('pc')" title="PC表示">PC</button>
+        <button class="btn-device" data-mode="tablet" onclick="setDevice('tablet')" title="タブレット">タブ</button>
+        <button class="btn-device" data-mode="mobile" onclick="setDevice('mobile')" title="スマホ">SP</button>
+      </div>
+      <div class="toolbar-actions">
+        <button class="btn-secondary" id="btnRegen" onclick="generateHP()" disabled>↺ 再生成</button>
+        <button class="btn-secondary" id="btnCode" onclick="showCode()" disabled>HTMLを見る</button>
+        <button class="btn-action btn-copy" id="btnCopy" onclick="copyHTML()" disabled>コピー</button>
+        <button class="btn-action btn-download" id="btnDownload" onclick="downloadHP()" disabled>⬇ ダウンロード</button>
+      </div>
+    </div>
+
+    <div class="preview-frame-wrapper mode-pc">
+      <div class="empty-state" id="emptyState">
+        <div class="icon">🖥️</div>
+        <p>左のフォームを入力してAI生成ボタンを押してください</p>
+      </div>
+
+      <div class="progress-overlay" id="progressOverlay">
+        <div class="spinner"></div>
+        <div class="progress-text" id="progressText">AIがHTMLを生成中...</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="char-count" id="charCount">0 文字生成済み</div>
+      </div>
+
+      <iframe id="previewFrame" style="display:none"></iframe>
+    </div>
+
+    <div class="status-bar" id="statusBar">
+      <div class="dot"></div>
+      <span id="statusText">待機中</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  let generatedHTML = '';
+  let isGenerating = false;
+  const ESTIMATED_MAX = 10000;
+
+  async function generateHP() {
+    const siteName = document.getElementById('siteName').value.trim();
+    const description = document.getElementById('description').value.trim();
+    if (!siteName || !description) { alert('サイト名と説明を入力してください'); return; }
+    if (isGenerating) return;
+
+    const sections = [...document.querySelectorAll('input[name="sections"]:checked')].map(el => el.value);
+    if (sections.length === 0) { alert('セクションを1つ以上選択してください'); return; }
+
+    const payload = {
+      siteName,
+      siteType: document.getElementById('siteType').value,
+      description,
+      colorScheme: document.querySelector('input[name="color"]:checked').value,
+      tone: document.querySelector('input[name="tone"]:checked').value,
+      designStyle: document.querySelector('input[name="designStyle"]:checked').value,
+      sections,
+      address: document.getElementById('address').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      hours: document.getElementById('hours').value.trim(),
+      sns: document.getElementById('sns').value.trim(),
+    };
+
+    startGenerating();
+    generatedHTML = '';
+
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || '生成に失敗しました');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let lastUpdate = 0;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          let data;
+          try { data = JSON.parse(line.slice(6)); } catch { continue; }
+          if (data.error) throw new Error(data.error);
+          if (data.text) {
+            generatedHTML += data.text;
+            updateProgress(generatedHTML.length);
+            if (generatedHTML.length - lastUpdate > 2000) {
+              liveUpdatePreview(generatedHTML);
+              lastUpdate = generatedHTML.length;
+            }
+          }
+          if (data.done) generatedHTML = data.html;
+        }
+      }
+
+      finishGenerating(generatedHTML);
+    } catch (err) {
+      errorGenerating(err.message);
+    }
+  }
+
+  function startGenerating() {
+    isGenerating = true;
+    ['btnGenerate','btnRegen','btnCode','btnCopy','btnDownload'].forEach(id => document.getElementById(id).disabled = true);
+    document.getElementById('btnGenerate').textContent = '生成中...';
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('previewFrame').style.display = 'none';
+    document.getElementById('progressOverlay').classList.add('active');
+    document.getElementById('progressBar').style.width = '0%';
+    document.getElementById('charCount').textContent = '0 文字生成済み';
+    setStatus('generating', 'AIがHTMLを生成中...');
+  }
+
+  function updateProgress(len) {
+    document.getElementById('progressBar').style.width = Math.min(95, len / ESTIMATED_MAX * 100) + '%';
+    document.getElementById('charCount').textContent = len.toLocaleString() + ' 文字生成済み';
+    const phases = [[2000,'構造を設計中...'],[5000,'コンテンツを生成中...'],[8000,'スタイルを仕上げ中...'],[Infinity,'JavaScriptを追加中...']];
+    document.getElementById('progressText').textContent = phases.find(([n]) => len < n)[1];
+  }
+
+  function liveUpdatePreview(html) {
+    const frame = document.getElementById('previewFrame');
+    if (frame.style.display === 'none') frame.style.display = 'block';
+    try {
+      const doc = frame.contentDocument || frame.contentWindow.document;
+      doc.open(); doc.write(html); doc.close();
+    } catch {}
+  }
+
+  function finishGenerating(html) {
+    isGenerating = false;
+    document.getElementById('progressOverlay').classList.remove('active');
+    document.getElementById('progressBar').style.width = '100%';
+    liveUpdatePreview(html);
+    document.getElementById('btnGenerate').disabled = false;
+    document.getElementById('btnGenerate').textContent = '✨ AIでHPを生成する';
+    ['btnRegen','btnCode','btnCopy','btnDownload'].forEach(id => document.getElementById(id).disabled = false);
+    setStatus('done', `生成完了！（${html.length.toLocaleString()} 文字）`);
+  }
+
+  function errorGenerating(msg) {
+    isGenerating = false;
+    document.getElementById('progressOverlay').classList.remove('active');
+    document.getElementById('emptyState').style.display = 'flex';
+    document.getElementById('btnGenerate').disabled = false;
+    document.getElementById('btnGenerate').textContent = '✨ AIでHPを生成する';
+    setStatus('error', 'エラー: ' + msg);
+  }
+
+  function downloadHP() {
+    if (!generatedHTML) return;
+    const name = (document.getElementById('siteName').value.trim() || 'homepage').replace(/[\\/:*?"<>|]/g, '_');
+    const a = Object.assign(document.createElement('a'), {
+      href: URL.createObjectURL(new Blob([generatedHTML], { type: 'text/html;charset=utf-8' })),
+      download: name + '.html'
+    });
+    a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  async function copyHTML() {
+    if (!generatedHTML) return;
+    try {
+      await navigator.clipboard.writeText(generatedHTML);
+      const btn = document.getElementById('btnCopy');
+      btn.textContent = '✓ コピー済み';
+      setTimeout(() => btn.textContent = 'コピー', 2000);
+    } catch { alert('クリップボードへのコピーに失敗しました'); }
+  }
+
+  function showCode() {
+    if (!generatedHTML) return;
+    const win = window.open('', '_blank');
+    win.document.write(`<pre style="font:13px/1.6 monospace;padding:20px;white-space:pre-wrap">${escapeHTML(generatedHTML)}</pre>`);
+    win.document.close();
+  }
+
+  function escapeHTML(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function setStatus(type, text) {
+    document.getElementById('statusBar').className = 'status-bar ' + type;
+    document.getElementById('statusText').textContent = text;
+  }
+
+  function setDevice(mode) {
+    const wrapper = document.querySelector('.preview-frame-wrapper');
+    wrapper.classList.remove('mode-pc', 'mode-tablet', 'mode-mobile');
+    wrapper.classList.add('mode-' + mode);
+    document.querySelectorAll('.btn-device').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  }
+
+  function saveForm() {
+    try {
+      localStorage.setItem('hp_tool_form', JSON.stringify({
+        siteName: document.getElementById('siteName').value,
+        siteType: document.getElementById('siteType').value,
+        description: document.getElementById('description').value,
+        color: document.querySelector('input[name="color"]:checked')?.value,
+        tone: document.querySelector('input[name="tone"]:checked')?.value,
+        designStyle: document.querySelector('input[name="designStyle"]:checked')?.value,
+        sections: [...document.querySelectorAll('input[name="sections"]:checked')].map(el => el.value),
+        address: document.getElementById('address').value,
+        phone: document.getElementById('phone').value,
+        hours: document.getElementById('hours').value,
+        sns: document.getElementById('sns').value,
+      }));
+    } catch {}
+  }
+
+  function loadForm() {
+    try {
+      const d = JSON.parse(localStorage.getItem('hp_tool_form'));
+      if (!d) return;
+      ['siteName','description','address','phone','hours','sns'].forEach(id => { if (d[id]) document.getElementById(id).value = d[id]; });
+      if (d.siteType) document.getElementById('siteType').value = d.siteType;
+      ['color','tone','designStyle'].forEach(name => {
+        if (!d[name]) return;
+        document.querySelectorAll(`input[name="${name}"]`).forEach(el => { if (el.value === d[name]) el.checked = true; });
+      });
+      if (d.sections) document.querySelectorAll('input[name="sections"]').forEach(el => { el.checked = d.sections.includes(el.value); });
+    } catch {}
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadForm();
+    document.querySelectorAll('#siteName,#siteType,#description,#address,#phone,#hours,#sns').forEach(el => el.addEventListener('input', saveForm));
+    document.querySelectorAll('input[name="color"],input[name="tone"],input[name="designStyle"],input[name="sections"]').forEach(el => el.addEventListener('change', saveForm));
+  });
+</script>
+</body>
+</html>
