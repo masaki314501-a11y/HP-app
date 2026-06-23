@@ -671,6 +671,7 @@
       <div class="section-block">
         <h2>クイック修正</h2>
         <div class="quick-edit-grid">
+          <button class="quick-btn" id="quickBtnImages" style="display:none;grid-column:1/-1;" onclick="quickEdit('選択したフリー画像をすべてHP内の適切な場所に<img>タグで追加して。まだ使われていない画像だけを追加し、既存の内容は変更しないこと。')">🖼️ 選んだ画像を反映</button>
           <button class="quick-btn" onclick="quickEdit('色をもっと明るい配色に変えて')">☀ 明るい配色</button>
           <button class="quick-btn" onclick="quickEdit('ダークテーマにして')">◑ ダーク</button>
           <button class="quick-btn" onclick="quickEdit('全体をシンプルでミニマルなデザインにして')">◻ シンプルに</button>
@@ -927,7 +928,11 @@
       const response = await fetch('/api/edit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ html: generatedHTML, instruction }),
+        body: JSON.stringify({
+          html: generatedHTML,
+          instruction,
+          images: confirmedImages.map(img => ({ url: img.full, alt: img.alt })),
+        }),
       });
       if (!response.ok) {
         const err = await response.json();
@@ -1156,6 +1161,7 @@
   function renderSelectedThumbs() {
     const wrap = document.getElementById('selectedImagesWrap');
     const grid = document.getElementById('selectedImagesGrid');
+    document.getElementById('quickBtnImages').style.display = confirmedImages.length ? '' : 'none';
     if (!confirmedImages.length) {
       wrap.classList.remove('has-images');
       return;

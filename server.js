@@ -57,7 +57,9 @@ ${imageLines ? `\n使用するフリー画像URL（これらをimgタグのsrc�
 - HTML・CSS・JSを1ファイルにまとめる
 ${imageLines ? '- 指定された画像URLを実際に<img src="...">として各セクションに適切に配置すること（提供した全画像を使い切ること）' : ''}
 
-HTMLのみ出力。\`\`\`不要。<!DOCTYPE html>から始めること。`;
+HTMLのみ出力。\`\`\`不要。<!DOCTYPE html>から始めること。${imageLines ? `
+
+最重要・絶対遵守: 上で渡した画像URL（${images.length}枚）を1枚も省略せず、すべて<img src="...">タグの実際のsrc属性値として使用すること。自分で別の画像URLを考案したり、画像を省略したりしてはならない。` : ''}`;
 
   try {
     res.setHeader('Content-Type', 'text/event-stream');
@@ -83,6 +85,7 @@ HTMLのみ出力。\`\`\`不要。<!DOCTYPE html>から始めること。`;
     }
 
     fullHtml = fullHtml.replace(/^```html\n?/, '').replace(/\n?```$/, '').trim();
+    fullHtml = insertMissingImages(fullHtml, images);
     res.write(`data: ${JSON.stringify({ done: true, html: fullHtml })}\n\n`);
     res.end();
   } catch (err) {
@@ -96,11 +99,32 @@ HTMLのみ出力。\`\`\`不要。<!DOCTYPE html>から始めること。`;
   }
 });
 
+// AIが指示を無視して画像を使わなかった場合に、漏れた画像をギャラリーとして補完する
+function insertMissingImages(html, images) {
+  if (!Array.isArray(images) || images.length === 0) return html;
+  const missing = images.filter(img => img.url && !html.includes(img.url));
+  if (missing.length === 0) return html;
+
+  const escapeAttr = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const gallery = `
+<section class="auto-photo-gallery" style="padding:60px 24px;text-align:center;">
+  <div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;max-width:1100px;margin:0 auto;">
+${missing.map(img => `    <img src="${escapeAttr(img.url)}" alt="${escapeAttr(img.alt || '')}" style="width:280px;height:200px;object-fit:cover;border-radius:12px;">`).join('\n')}
+  </div>
+</section>
+`;
+  return /<\/body>/i.test(html) ? html.replace(/<\/body>/i, gallery + '</body>') : html + gallery;
+}
+
 app.post('/api/edit', async (req, res) => {
-  const { html, instruction } = req.body;
+  const { html, instruction, images } = req.body;
   if (!html || !instruction) {
     return res.status(400).json({ error: 'HTMLと修正指示は必須です' });
   }
+
+  const imageLines = Array.isArray(images) && images.length > 0
+    ? images.map((img, i) => `  画像${i + 1}: ${img.url}  （説明: ${img.alt}）`).join('\n')
+    : '';
 
   const prompt = `あなたはプロのWebデザイナーです。以下のHTMLを指示に従って修正してください。
 
@@ -109,6 +133,7 @@ app.post('/api/edit', async (req, res) => {
 重要:
 - 指示された箇所のみ修正し、それ以外は完全に保持すること
 - HTMLのみ出力。\`\`\`不要。<!DOCTYPE html>から始めること
+${imageLines ? `\n利用可能なフリー画像URL（指示に関連する場合はこれらを<img src="...">として使うこと。既存のimgタグは削除しないこと）:\n${imageLines}` : ''}
 
 現在のHTML:
 ${html}`;
@@ -136,6 +161,7 @@ ${html}`;
     }
 
     fullHtml = fullHtml.replace(/^```html\n?/, '').replace(/\n?```$/, '').trim();
+    fullHtml = insertMissingImages(fullHtml, images);
     res.write(`data: ${JSON.stringify({ done: true, html: fullHtml })}\n\n`);
     res.end();
   } catch (err) {
