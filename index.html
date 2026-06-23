@@ -316,10 +316,177 @@
     .status-bar.error .dot { background: #e74c3c; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
+    .sidebar-tabs { display: flex; gap: 6px; }
+    .tab-btn {
+      flex: 1; padding: 8px;
+      border: 1.5px solid #dde1ec; border-radius: 8px;
+      font-size: 13px; font-family: inherit; font-weight: 600;
+      cursor: pointer; background: #f4f5f9; color: #888;
+      transition: all 0.15s;
+    }
+    .tab-btn.active { background: linear-gradient(135deg, #667eea, #764ba2); border-color: transparent; color: white; }
+    .tab-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .tab-btn:not(.active):not(:disabled):hover { border-color: #667eea; color: #667eea; }
+    .tab-panel { display: flex; flex-direction: column; gap: 20px; flex: 1; }
+
+    .history-item {
+      padding: 8px 10px; border: 1px solid #e8eaf0; border-radius: 7px;
+      font-size: 12px; color: #555; cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+      background: #fafbff; transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .history-item:hover { background: #f0f2ff; border-color: #667eea; color: #667eea; }
+    .hist-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .hist-icon { font-size: 11px; opacity: 0.5; flex-shrink: 0; }
+    .quick-edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .quick-btn {
+      padding: 7px 8px; border: 1.5px solid #dde1ec; border-radius: 8px;
+      font-size: 11px; font-family: inherit; color: #555;
+      background: #fafbff; cursor: pointer; transition: all 0.15s; text-align: left;
+    }
+    .quick-btn:hover { border-color: #667eea; color: #667eea; background: #f0f2ff; }
+
     @media (max-width: 900px) {
       .container { grid-template-columns: 1fr; }
       .preview-area { display: none; }
     }
+
+    /* ===== IMAGE LIBRARY ===== */
+    .btn-img-library {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 9px 13px;
+      border: 1.5px dashed #667eea;
+      border-radius: 10px;
+      font-size: 13px; font-family: inherit; font-weight: 600;
+      color: #667eea; background: #f5f6ff;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-img-library:hover { background: #eef0ff; border-style: solid; }
+
+    .selected-images-wrap {
+      display: none; flex-direction: column; gap: 8px;
+    }
+    .selected-images-wrap.has-images { display: flex; }
+    .selected-images-label { font-size: 11px; font-weight: 600; color: #777; text-transform: uppercase; letter-spacing: 0.5px; }
+    .selected-images-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+    .sel-img-thumb {
+      position: relative; width: 60px; height: 60px;
+      border-radius: 7px; overflow: hidden;
+      border: 2px solid #667eea; cursor: pointer;
+    }
+    .sel-img-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .sel-img-thumb .remove-btn {
+      position: absolute; top: 2px; right: 2px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: rgba(0,0,0,0.7); color: white;
+      font-size: 10px; display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.15s;
+    }
+    .sel-img-thumb:hover .remove-btn { opacity: 1; }
+
+    /* Modal */
+    .img-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+      z-index: 1000; display: none; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .img-modal-overlay.open { display: flex; }
+    .img-modal {
+      background: white; border-radius: 16px;
+      width: 100%; max-width: 900px; max-height: 88vh;
+      display: flex; flex-direction: column;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.25);
+    }
+    .img-modal-header {
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid #e8eaf0;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .img-modal-header h3 { font-size: 16px; font-weight: 700; flex: 1; }
+    .img-modal-search {
+      flex: 1; max-width: 260px;
+      padding: 7px 12px; border: 1px solid #dde1ec; border-radius: 8px;
+      font-size: 13px; font-family: inherit; background: #fafbff;
+    }
+    .img-modal-search:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.15); }
+    .btn-modal-close {
+      width: 32px; height: 32px; border-radius: 8px; border: none;
+      background: #f4f5f9; color: #666; font-size: 18px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .btn-modal-close:hover { background: #eaecf5; }
+
+    .img-modal-cats {
+      display: flex; gap: 6px; padding: 12px 22px;
+      border-bottom: 1px solid #e8eaf0;
+      overflow-x: auto; scrollbar-width: none; flex-shrink: 0;
+    }
+    .img-modal-cats::-webkit-scrollbar { display: none; }
+    .cat-tab {
+      white-space: nowrap; padding: 5px 13px;
+      border: 1.5px solid #dde1ec; border-radius: 20px;
+      font-size: 12px; font-family: inherit; font-weight: 500;
+      color: #666; background: #fafbff; cursor: pointer;
+      transition: all 0.15s; flex-shrink: 0;
+    }
+    .cat-tab:hover { border-color: #667eea; color: #667eea; }
+    .cat-tab.active { background: #667eea; border-color: #667eea; color: white; font-weight: 600; }
+
+    .img-modal-grid-wrap { flex: 1; overflow-y: auto; padding: 16px 22px; }
+    .img-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+    }
+    .img-card {
+      border-radius: 10px; overflow: hidden;
+      cursor: pointer; position: relative;
+      aspect-ratio: 4/3;
+      border: 2.5px solid transparent;
+      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+      background: #f0f2f5;
+    }
+    .img-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+    .img-card.selected { border-color: #667eea; }
+    .img-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .img-card .check {
+      position: absolute; top: 6px; right: 6px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: #667eea; color: white;
+      font-size: 13px; display: none; align-items: center; justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    .img-card.selected .check { display: flex; }
+    .img-card .img-alt {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.6));
+      color: white; font-size: 10px; padding: 12px 6px 5px;
+      opacity: 0; transition: opacity 0.15s;
+    }
+    .img-card:hover .img-alt { opacity: 1; }
+    .img-empty { grid-column: 1/-1; text-align: center; padding: 40px; color: #aaa; font-size: 14px; }
+
+    .img-modal-footer {
+      padding: 14px 22px;
+      border-top: 1px solid #e8eaf0;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .img-modal-footer .sel-count { font-size: 13px; color: #667eea; font-weight: 600; flex: 1; }
+    .btn-modal-confirm {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white; border: none;
+      padding: 9px 20px; border-radius: 8px;
+      font-size: 13px; font-family: inherit; font-weight: 700;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn-modal-confirm:hover { opacity: 0.9; }
+    .btn-modal-cancel {
+      background: #f4f5f9; border: 1px solid #dde1ec; color: #555;
+      padding: 9px 16px; border-radius: 8px;
+      font-size: 13px; font-family: inherit; cursor: pointer;
+    }
+    .btn-modal-cancel:hover { background: #eaecf5; }
   </style>
 </head>
 <body>
@@ -331,6 +498,13 @@
 
 <div class="container">
   <div class="sidebar">
+
+    <div class="sidebar-tabs">
+      <button class="tab-btn active" id="tabGenerate" onclick="switchTab('generate')">生成</button>
+      <button class="tab-btn" id="tabEdit" onclick="switchTab('edit')" disabled>✏️ 修正</button>
+    </div>
+
+    <div class="tab-panel" id="generatePanel">
 
     <!-- 基本情報 -->
     <div class="section-block">
@@ -464,9 +638,53 @@
       </div>
     </details>
 
+    <!-- フリー画像ライブラリ -->
+    <div class="section-block">
+      <h2>フリー画像</h2>
+      <div class="selected-images-wrap" id="selectedImagesWrap">
+        <div class="selected-images-label">選択中の画像</div>
+        <div class="selected-images-grid" id="selectedImagesGrid"></div>
+      </div>
+      <button class="btn-img-library" onclick="openImageModal()">
+        <span>🖼️</span> フリー画像ライブラリを開く
+      </button>
+    </div>
+
     <button class="btn-generate" id="btnGenerate" onclick="generateHP()">
       ✨ AIでHPを生成する
     </button>
+
+    </div><!-- /generatePanel -->
+
+    <div class="tab-panel" id="editTabPanel" style="display:none">
+
+      <div class="section-block" id="editHistorySection" style="display:none">
+        <h2>修正履歴</h2>
+        <div id="historyList" style="display:flex;flex-direction:column;gap:5px;"></div>
+      </div>
+
+      <div class="section-block">
+        <h2>修正指示</h2>
+        <textarea id="editInput" rows="4" placeholder="例: ヘッダーをシンプルに&#10;料金プランを3つに変える&#10;背景色を白に..."></textarea>
+      </div>
+
+      <div class="section-block">
+        <h2>クイック修正</h2>
+        <div class="quick-edit-grid">
+          <button class="quick-btn" onclick="quickEdit('色をもっと明るい配色に変えて')">☀ 明るい配色</button>
+          <button class="quick-btn" onclick="quickEdit('ダークテーマにして')">◑ ダーク</button>
+          <button class="quick-btn" onclick="quickEdit('全体をシンプルでミニマルなデザインにして')">◻ シンプルに</button>
+          <button class="quick-btn" onclick="quickEdit('全体のフォントサイズを大きくして読みやすくして')">A+ フォント拡大</button>
+          <button class="quick-btn" onclick="quickEdit('ヒーローセクションを全画面表示にして迫力を出して')">▣ ヒーロー全画面</button>
+          <button class="quick-btn" onclick="quickEdit('スクロールアニメーションやホバーエフェクトを増やして')">✦ アニメ追加</button>
+          <button class="quick-btn" onclick="quickEdit('より高級感・高品質なデザインに仕上げて')">◆ 高級感</button>
+          <button class="quick-btn" onclick="quickEdit('モバイル表示をもっと見やすく最適化して')">▣ SP最適化</button>
+        </div>
+      </div>
+
+      <button class="btn-generate" id="btnEdit" onclick="editHP()">✏️ 修正する</button>
+    </div><!-- /editTabPanel -->
+
   </div>
 
   <!-- プレビューエリア -->
@@ -504,9 +722,29 @@
       <iframe id="previewFrame" style="display:none"></iframe>
     </div>
 
-    <div class="status-bar" id="statusBar">
+<div class="status-bar" id="statusBar">
       <div class="dot"></div>
       <span id="statusText">待機中</span>
+    </div>
+  </div>
+</div>
+
+<!-- Image Library Modal -->
+<div class="img-modal-overlay" id="imgModalOverlay" onclick="handleOverlayClick(event)">
+  <div class="img-modal">
+    <div class="img-modal-header">
+      <h3>🖼️ フリー画像ライブラリ</h3>
+      <input class="img-modal-search" id="imgSearch" type="text" placeholder="画像を検索..." oninput="filterImages()">
+      <button class="btn-modal-close" onclick="closeImageModal()">✕</button>
+    </div>
+    <div class="img-modal-cats" id="imgModalCats"></div>
+    <div class="img-modal-grid-wrap">
+      <div class="img-grid" id="imgGrid"></div>
+    </div>
+    <div class="img-modal-footer">
+      <span class="sel-count" id="modalSelCount">0枚選択中</span>
+      <button class="btn-modal-cancel" onclick="closeImageModal()">キャンセル</button>
+      <button class="btn-modal-confirm" onclick="confirmImages()">この画像を使う</button>
     </div>
   </div>
 </div>
@@ -537,6 +775,7 @@
       phone: document.getElementById('phone').value.trim(),
       hours: document.getElementById('hours').value.trim(),
       sns: document.getElementById('sns').value.trim(),
+      images: confirmedImages.map(img => ({ url: img.full, alt: img.alt })),
     };
 
     startGenerating();
@@ -625,6 +864,7 @@
     document.getElementById('btnGenerate').disabled = false;
     document.getElementById('btnGenerate').textContent = '✨ AIでHPを生成する';
     ['btnRegen','btnCode','btnCopy','btnDownload'].forEach(id => document.getElementById(id).disabled = false);
+    document.getElementById('tabEdit').disabled = false;
     setStatus('done', `生成完了！（${html.length.toLocaleString()} 文字）`);
   }
 
@@ -671,6 +911,88 @@
     document.getElementById('statusText').textContent = text;
   }
 
+  async function editHP() {
+    if (!generatedHTML || isGenerating) return;
+    const instruction = document.getElementById('editInput').value.trim();
+    if (!instruction) { document.getElementById('editInput').focus(); return; }
+
+    isGenerating = true;
+    const btnEdit = document.getElementById('btnEdit');
+    btnEdit.disabled = true;
+    btnEdit.textContent = '修正中...';
+    ['btnGenerate','btnRegen','btnCode','btnCopy','btnDownload'].forEach(id => document.getElementById(id).disabled = true);
+    setStatus('generating', 'AIが修正中...');
+
+    try {
+      const response = await fetch('/api/edit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ html: generatedHTML, instruction }),
+      });
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || '修正に失敗しました');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '', newHTML = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          let data; try { data = JSON.parse(line.slice(6)); } catch { continue; }
+          if (data.error) throw new Error(data.error);
+          if (data.text) newHTML += data.text;
+          if (data.done) newHTML = data.html;
+        }
+      }
+
+      generatedHTML = newHTML;
+      liveUpdatePreview(generatedHTML);
+      addHistory(instruction);
+      document.getElementById('editInput').value = '';
+      setStatus('done', `修正完了！（${generatedHTML.length.toLocaleString()} 文字）`);
+    } catch (err) {
+      setStatus('error', 'エラー: ' + err.message);
+    } finally {
+      isGenerating = false;
+      btnEdit.disabled = false;
+      btnEdit.textContent = '✏️ 修正する';
+      document.getElementById('btnGenerate').disabled = false;
+      ['btnRegen','btnCode','btnCopy','btnDownload'].forEach(id => document.getElementById(id).disabled = false);
+    }
+  }
+
+  let editHistory = [];
+
+  function switchTab(tab) {
+    const isGenerate = tab === 'generate';
+    document.getElementById('generatePanel').style.display = isGenerate ? 'flex' : 'none';
+    document.getElementById('editTabPanel').style.display = isGenerate ? 'none' : 'flex';
+    document.getElementById('tabGenerate').classList.toggle('active', isGenerate);
+    document.getElementById('tabEdit').classList.toggle('active', !isGenerate);
+  }
+
+  function quickEdit(text) {
+    document.getElementById('editInput').value = text;
+    document.getElementById('editInput').focus();
+  }
+
+  function addHistory(instruction) {
+    editHistory = [instruction, ...editHistory.filter(h => h !== instruction)].slice(0, 5);
+    const section = document.getElementById('editHistorySection');
+    const list = document.getElementById('historyList');
+    section.style.display = '';
+    list.innerHTML = editHistory.map(h =>
+      `<div class="history-item" onclick="quickEdit(${JSON.stringify(h)})"><span class="hist-text">${escapeHTML(h)}</span><span class="hist-icon">↩</span></div>`
+    ).join('');
+  }
+
   function setDevice(mode) {
     const wrapper = document.querySelector('.preview-frame-wrapper');
     wrapper.classList.remove('mode-pc', 'mode-tablet', 'mode-mobile');
@@ -714,7 +1036,143 @@
     loadForm();
     document.querySelectorAll('#siteName,#siteType,#description,#address,#phone,#hours,#sns').forEach(el => el.addEventListener('input', saveForm));
     document.querySelectorAll('input[name="color"],input[name="tone"],input[name="designStyle"],input[name="sections"]').forEach(el => el.addEventListener('change', saveForm));
+    document.getElementById('editInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); editHP(); } });
   });
+
+  // ===== IMAGE LIBRARY =====
+  let imgData = null;
+  let activeCat = 'all';
+  let modalSelected = new Set();
+  let confirmedImages = [];
+
+  function unsplashThumb(id) {
+    return `https://images.unsplash.com/photo-${id}?w=300&h=220&auto=format&fit=crop&q=75`;
+  }
+  function unsplashFull(id) {
+    return `https://images.unsplash.com/photo-${id}?w=1200&auto=format&fit=crop&q=85`;
+  }
+
+  async function openImageModal() {
+    if (!imgData) {
+      try {
+        const res = await fetch('/api/images');
+        imgData = await res.json();
+      } catch {
+        alert('画像データの読み込みに失敗しました');
+        return;
+      }
+    }
+    modalSelected = new Set(confirmedImages.map(img => img.id));
+    renderCatTabs();
+    renderImageGrid();
+    updateModalSelCount();
+    document.getElementById('imgSearch').value = '';
+    document.getElementById('imgModalOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeImageModal() {
+    document.getElementById('imgModalOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('imgModalOverlay')) closeImageModal();
+  }
+
+  function renderCatTabs() {
+    const cats = document.getElementById('imgModalCats');
+    const allImages = imgData.categories.flatMap(c => c.images);
+    cats.innerHTML = `<button class="cat-tab ${activeCat === 'all' ? 'active' : ''}" onclick="setCat('all')">すべて（${allImages.length}）</button>` +
+      imgData.categories.map(c =>
+        `<button class="cat-tab ${activeCat === c.id ? 'active' : ''}" onclick="setCat('${c.id}')">${c.icon} ${c.name}（${c.images.length}）</button>`
+      ).join('');
+  }
+
+  function setCat(id) {
+    activeCat = id;
+    document.getElementById('imgSearch').value = '';
+    renderCatTabs();
+    renderImageGrid();
+  }
+
+  function filterImages() {
+    activeCat = 'all';
+    renderCatTabs();
+    renderImageGrid();
+  }
+
+  function getFilteredImages() {
+    const q = document.getElementById('imgSearch').value.toLowerCase().trim();
+    let images = activeCat === 'all'
+      ? imgData.categories.flatMap(c => c.images.map(img => ({ ...img, catId: c.id })))
+      : imgData.categories.find(c => c.id === activeCat)?.images.map(img => ({ ...img, catId: activeCat })) || [];
+    if (q) images = images.filter(img => img.alt.toLowerCase().includes(q) || img.tags.some(t => t.toLowerCase().includes(q)));
+    return images;
+  }
+
+  function renderImageGrid() {
+    const grid = document.getElementById('imgGrid');
+    const images = getFilteredImages();
+    if (!images.length) {
+      grid.innerHTML = '<div class="img-empty">該当する画像が見つかりませんでした</div>';
+      return;
+    }
+    grid.innerHTML = images.map(img => `
+      <div class="img-card ${modalSelected.has(img.id) ? 'selected' : ''}" onclick="toggleImgSelect('${img.id}', '${escapeHTML(img.alt)}')" title="${escapeHTML(img.alt)}">
+        <img src="${unsplashThumb(img.id)}" alt="${escapeHTML(img.alt)}" loading="lazy">
+        <div class="check">✓</div>
+        <div class="img-alt">${escapeHTML(img.alt)}</div>
+      </div>
+    `).join('');
+  }
+
+  function toggleImgSelect(id, alt) {
+    if (modalSelected.has(id)) {
+      modalSelected.delete(id);
+    } else {
+      if (modalSelected.size >= 8) { alert('最大8枚まで選択できます'); return; }
+      modalSelected.add(id);
+    }
+    const card = document.querySelector(`.img-card[onclick*="'${id}'"]`);
+    if (card) card.classList.toggle('selected', modalSelected.has(id));
+    updateModalSelCount();
+  }
+
+  function updateModalSelCount() {
+    document.getElementById('modalSelCount').textContent = `${modalSelected.size}枚選択中`;
+  }
+
+  function confirmImages() {
+    const allImages = imgData.categories.flatMap(c => c.images);
+    confirmedImages = [...modalSelected].map(id => {
+      const img = allImages.find(i => i.id === id);
+      return img ? { id, alt: img.alt, thumb: unsplashThumb(id), full: unsplashFull(id) } : null;
+    }).filter(Boolean);
+    renderSelectedThumbs();
+    closeImageModal();
+  }
+
+  function renderSelectedThumbs() {
+    const wrap = document.getElementById('selectedImagesWrap');
+    const grid = document.getElementById('selectedImagesGrid');
+    if (!confirmedImages.length) {
+      wrap.classList.remove('has-images');
+      return;
+    }
+    wrap.classList.add('has-images');
+    grid.innerHTML = confirmedImages.map(img => `
+      <div class="sel-img-thumb" title="${escapeHTML(img.alt)}">
+        <img src="${img.thumb}" alt="${escapeHTML(img.alt)}">
+        <div class="remove-btn" onclick="removeConfirmedImage('${img.id}')">✕</div>
+      </div>
+    `).join('');
+  }
+
+  function removeConfirmedImage(id) {
+    confirmedImages = confirmedImages.filter(img => img.id !== id);
+    renderSelectedThumbs();
+  }
 </script>
 </body>
 </html>
